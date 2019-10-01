@@ -24,14 +24,11 @@ If trouble arises, some solutions I found particularly useful can be found [here
 The code requires several inputs, which will be detailed below.
 Please note that I am unable to provide the data samples used for the analysis as they are internal to the collaboration.  As such the paths specified in the repository will not work and would need to be updated to your own samples.
 
-1. Input signal file in `src/Main.cxx`
-   sig_chain->AddFile("/path/to/signal/file.root");
-2. Input background file(s) in `src/Main.cxx`.  The first file is input manually much like the signal:
-   bkg_chain->AddFile("/path/to/bkg/file.root");
+1. Input signal file in `src/Main.cxx`: `sig_chain->AddFile("/path/to/signal/file.root");`
+2. Input background file(s) in `src/Main.cxx`.  The first file is input manually much like the signal: `bkg_chain->AddFile("/path/to/bkg/file.root");`
 Alternatively, background files may be read in from a text file containing the full file path per sample per line.  The default file is located in `data/files_20GeV.txt`.
 3. Cross section and normalizations are read in from `data/xsec_20GeV.txt`.
-4. The number of cut points (see RGS paper) can be requested as a command line argument during running.  If no number is specified, the code will default to 10,000 cut points:
-   ./train <number of cut points>
+4. The number of cut points (see RGS paper) can be requested as a command line argument during running.  If no number is specified, the code will default to 10,000 cut points: `./train <number of cut points>`
 
 ## Running the analysis
 The python script responsible for running the analysis after training is a modified version of the one provided by the RGS package, and it is located in the `analysis` subdirectory of this repository.

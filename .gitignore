@@ -1,0 +1,13 @@
+*~
+**/*~
+
+*.root
+**/*.root
+
+obj/
+
+root_backups/
+
+train
+
+script.py
