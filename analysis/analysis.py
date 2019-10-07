@@ -46,8 +46,7 @@ def cut(event, full=False):
     return False
 # ---------------------------------------------------------------------
 def atlas():
-    print ". . .Setting up ATLAS Style. . ."
-    gROOT.LoadMacro("AtlasStyle.C")
+    print ". . .Setting up plot style. . ."
     font = 42
     gStyle.SetTextFont(font)
     gStyle.SetLabelFont(font, "x")

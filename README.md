@@ -22,7 +22,7 @@ Once again, ROOT is required, and linking the libraries can be rather finicky, a
 If trouble arises, some solutions I found particularly useful can be found [here](https://stackoverflow.com/a/2481326) and [here](https://root-forum.cern.ch/t/linking-root-libraries-to-a-makefile-install/12233).
 
 The code requires several inputs, which will be detailed below.
-Please note that I am unable to provide the data samples used for the analysis as they are internal to the collaboration.  As such the paths specified in the repository will not work and would need to be updated to your own samples.
+**Please note that I am unable to provide the data samples used for the analysis as they are internal to the collaboration**.  As such the paths specified in the repository will not work and would need to be updated to your own samples.
 
 1. Input signal file in `src/Main.cxx`: `sig_chain->AddFile("/path/to/signal/file.root");`
 2. Input background file(s) in `src/Main.cxx`.  The first file is input manually much like the signal: `bkg_chain->AddFile("/path/to/bkg/file.root");`
@@ -33,6 +33,4 @@ Alternatively, background files may be read in from a text file containing the f
 ## Running the analysis
 The python script responsible for running the analysis after training is a modified version of the one provided by the RGS package, and it is located in the `analysis` subdirectory of this repository.
 
-TODO -- add list of changes and running instructions
-
-TODO -- provide ATLAS style
+Running the actual analysis code will likely not be possible without a lot of effort to replace required files with my changes as well as setting up proper paths and data dependencies.  As a result, they are included here more as a reference/archive rather than as a working example.
