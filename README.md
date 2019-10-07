@@ -30,7 +30,9 @@ Alternatively, background files may be read in from a text file containing the f
 3. Cross section and normalizations are read in from `data/xsec_20GeV.txt`.
 4. The number of cut points (see RGS paper) can be requested as a command line argument during running.  If no number is specified, the code will default to 10,000 cut points: `./train <number of cut points>`
 
-## Running the analysis
-The python script responsible for running the analysis after training is a modified version of the one provided by the RGS package, and it is located in the `analysis` subdirectory of this repository.
+## Choosing the best cut point
+The python script responsible for running the analysis that chooses the best cut point is a modified version of the one provided by the RGS package, and it is located in the `analysis` subdirectory of this repository.
+
+Essentially, the code chooses the cut point that maximizes signal significance given a set of 3 criteria (restrictions on how much certain variables are able to fluctuate from their default values, as well as a requirement that if the number of signal events is reduced, the significance must increase by enough to justify this signal loss).
 
 Running the actual analysis code will likely not be possible without a lot of effort to replace required files with my changes as well as setting up proper paths and data dependencies.  As a result, they are included here more as a reference/archive rather than as a working example.
