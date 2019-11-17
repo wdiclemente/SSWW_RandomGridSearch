@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
 
   sig_chain->AddFile("/home/will/Documents/ssww_upgrade_rgs/ssww_local_data/local_v14_20GeV/hist-oldsamples.mc15_14TeV.private.ssWWEW.root");
 
-  // build background chain from text file
+  // get list of background samples from text file
   std::vector<std::string> bkg_files;
   std::string filename;
   std::ifstream inFile("/home/will/Documents/ssww_upgrade_rgs/will_train/data/files_20GeV.txt");
@@ -22,17 +22,17 @@ int main(int argc, char *argv[]){
   }
   while(getline(inFile,filename)) bkg_files.push_back(filename);
 
-  bkg_chain->AddFile("/home/will/Documents/ssww_upgrade_rgs/ssww_local_data/local_v14_20GeV/hist-oldsamples.mc15_14TeV.private.ssWWQCD.root");
+  // build chain of bkg samples
   for(std::vector<std::string>::const_iterator i=bkg_files.begin();i != bkg_files.end();++i){
     bkg_chain->AddFile(i->c_str());
   }
 
+  // make the train object
   Train *t = new Train();
 
-  // initialize bits of the analysis
+  // initialize cross sections (weights) for the events
   std::string xsec_file = "/home/will/Documents/ssww_upgrade_rgs/will_train/data/xsec_20GeV.txt";
   t->SetupCrossSections(xsec_file);
-  t->SetupOutput();
 
   // read signal
   t->Init(sig_chain);
@@ -41,6 +41,9 @@ int main(int argc, char *argv[]){
   // read background
   t->Init(bkg_chain);
   int totBkg = t->ReadBackground();
+
+  // set up output file (this requires the run number list which is filled when data is read)
+  t->SetupOutput();
 
   std::cout << "---------- Run Summary ----------" << std::endl;
   std::cout << "Total sig events seen: " << totSig            << std::endl;
@@ -51,6 +54,7 @@ int main(int argc, char *argv[]){
   std::cout << "---------------------------------" << std::endl;
 
   // train the optimization
+  //   parse command line selection for number of cut points
   int defaultCutPoint = 10000;
   if(argc < 2) {
     std::cout << "INFO Main: Number of cut points not specified at command line, using default." << std::endl;
@@ -71,6 +75,7 @@ int main(int argc, char *argv[]){
   }
   // finalize
   t->FinalizeOutput();
+  delete t;
 
   return 0;
 }

@@ -1,3 +1,4 @@
+/home/will/Documents/ssww_upgrade_rgs/ssww_local_data/local_v14_20GeV/hist-oldsamples.mc15_14TeV.private.ssWWQCD.root
 /home/will/Documents/ssww_upgrade_rgs/ssWW_upgrade_v14_20GeV/user.wdicleme.ssWWupgrade.147806.mc15_14TeV.optimize.skimmed.v14.20GeV.FCTight.00_hist/merged.147806.root
 /home/will/Documents/ssww_upgrade_rgs/ssWW_upgrade_v14_20GeV/user.wdicleme.ssWWupgrade.147807.mc15_14TeV.optimize.skimmed.v14.20GeV.FCTight.00_hist/merged.147807.root
 /home/will/Documents/ssww_upgrade_rgs/ssWW_upgrade_v14_20GeV/user.wdicleme.ssWWupgrade.363507.mc15_14TeV.optimize.skimmed.v14.20GeV.FCTight.00_hist/user.wdicleme.16011546._000001.hist-output.root
