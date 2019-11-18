@@ -1,3 +1,4 @@
+from ROOT import *
 from math import sqrt,log
 from cutpoint import *
 
@@ -129,3 +130,169 @@ def get_event_weights():
             line = f.readline()
     return weights
 
+# returns two lists of 1D histograms for each of the optimization variables
+#  the first list is for signal and the second is for background
+#  these are hard-coded for now, and the order MUST be the same here and in fill_histograms()
+def create_histograms():
+    h_sig = []
+    h_bkg = []
+    plot_vars = ['mll', 'mjj', 'lepjet_centrality',
+                 'leptons_selected_l0_pt',
+                 'leptons_selected_l1_pt',
+                 'jets_selected_j0_pt',
+                 'jets_selected_j1_pt']
+
+    h_sig.append(TH1F("sig_mll","m_{ll}",20,0,500))
+    h_bkg.append(TH1F("bkg_mll","m_{ll}",20,0,500))
+
+    h_sig.append(TH1F("sig_mjj","m_{jj}",20,0,1500))
+    h_bkg.append(TH1F("bkg_mjj","m_{jj}",20,0,1500))
+
+    h_sig.append(TH1F("sig_centrality","centrality",20,-3,3))
+    h_bkg.append(TH1F("bkg_centrality","centrality",20,-3,3))
+
+    h_sig.append(TH1F("sig_l0pt","l_{0} p_{T}",18,0,360))
+    h_bkg.append(TH1F("bkg_l0pt","l_{0} p_{T}",18,0,360))
+
+    h_sig.append(TH1F("sig_l1pt","l_{1} p_{T}",18,0,360))
+    h_bkg.append(TH1F("bkg_l1pt","l_{1} p_{T}",18,0,360))
+
+    h_sig.append(TH1F("sig_j0pt","j_{0} p_{T}",18,0,600))
+    h_bkg.append(TH1F("bkg_j0pt","j_{0} p_{T}",18,0,600))
+
+    h_sig.append(TH1F("sig_j1pt","j_{1} p_{T}",18,0,600))
+    h_bkg.append(TH1F("bkg_j1pt","j_{1} p_{T}",18,0,600))
+
+    return h_sig, h_bkg
+
+# fills the histograms for the given event
+#  order MUST be the same as in create_histograms
+def fill_histograms(event, weight, histograms):
+
+    histograms[0].Fill(event.mll,                    weight)
+    histograms[1].Fill(event.mjj,                    weight)
+    histograms[2].Fill(event.lepjet_centrality,      weight)
+    histograms[3].Fill(event.leptons_selected_l0_pt, weight)
+    histograms[4].Fill(event.leptons_selected_l1_pt, weight)
+    histograms[5].Fill(event.jets_selected_j0_pt,    weight)
+    histograms[6].Fill(event.jets_selected_j1_pt,    weight)
+
+    return
+
+# set global plot style
+def plot_style():
+    style = TStyle("style","style")
+
+    icol = 0 #white
+    style.SetFrameBorderMode(icol)
+    style.SetFrameFillColor(icol)
+    style.SetCanvasBorderMode(icol)
+    style.SetCanvasColor(icol)
+    style.SetPadBorderMode(icol)
+    style.SetPadColor(icol)
+    style.SetStatColor(icol)
+
+    style.SetPaperSize(20,26)
+
+    style.SetPadTopMargin(0.05)
+    style.SetPadRightMargin(0.05)
+    style.SetPadBottomMargin(0.16)
+    style.SetPadLeftMargin(0.16)
+
+    style.SetTitleXOffset(1.4)
+    style.SetTitleYOffset(1.4)
+
+    font = 42
+    tsize = 0.05
+    style.SetTextFont(font)
+
+    style.SetTextSize(tsize)
+    style.SetLabelFont(font,"x")
+    style.SetTitleFont(font,"x")
+    style.SetLabelFont(font,"y")
+    style.SetTitleFont(font,"y")
+    style.SetLabelFont(font,"z")
+    style.SetTitleFont(font,"z")
+    
+    style.SetLabelSize(tsize,"x")
+    style.SetTitleSize(tsize,"x")
+    style.SetLabelSize(tsize,"y")
+    style.SetTitleSize(tsize,"y")
+    style.SetLabelSize(tsize,"z")
+    style.SetTitleSize(tsize,"z")
+    
+    style.SetMarkerStyle(20)
+    style.SetMarkerSize(1.2)
+    style.SetHistLineWidth(2)
+    style.SetLineStyleString(2,"[12 12]")
+
+    style.SetEndErrorSize(0.)
+
+    style.SetOptTitle(0)
+    style.SetOptStat(0)
+    style.SetOptFit(0)
+
+    style.SetPadTickX(1)
+    style.SetPadTickY(1)
+
+    # apply the style
+    style.cd()
+
+# applies formatting to histogram
+def format_hist(hist, is_signal, normalize, xaxis_label = ""):
+    colors = [kBlack,kBlue-9]
+    hist.GetYaxis().SetTitle("Events")
+    hist.GetXaxis().SetTitle(xaxis_label)
+    
+    if not is_signal:
+        hist.SetLineColor(kBlack)
+        hist.SetLineStyle(1)
+        hist.SetFillStyle(1001)
+        hist.SetFillColor(colors[1])
+
+    else:
+        hist.SetLineColor(colors[0])
+        hist.SetMarkerColor(colors[0])
+        hist.SetMarkerStyle(kFullCircle)
+
+    if normalize:
+        h_int = hist.Integral()
+        if not h_int == 0:
+            hist.Scale(1/h_int)
+        
+    return
+
+# scales axes for list of histograms so they all fit on the same view
+def scale_y_axis(plot_list, scale_factor=1.4):
+    maximum = -1
+    for plot in plot_list:
+        temp = plot.GetMaximum()
+        if temp > maximum:
+            maximum = temp
+
+    for plot in plot_list:
+        plot.SetMinimum(0)
+        plot.SetMaximum(maximum*scale_factor)
+        plot.SetMinimum(.001)
+    return
+
+# makes a vertical line at the given x_coord
+def getTLineY(x_coord,hist,opt=False):
+    ymin = 0 #hist.GetMinimum()
+    ymax = hist.GetMaximum()
+    line = TLine(x_coord, ymin, x_coord, ymax)
+    if opt:
+        line.SetLineColor(8)
+    else:
+        line.SetLineColor(2)
+    line.SetLineWidth(2)
+    line.SetLineStyle(9)
+    return line
+
+# makes a horizontal arrow from x1 to x2
+def getTArrowX(x1, x2, hist):
+    y0 = hist.GetMaximum()*0.8
+    arrow = TArrow(x1, y0, x2, y0, 0.025, "|>")
+    arrow.SetAngle(40)
+    arrow.SetLineWidth(2)
+    return arrow

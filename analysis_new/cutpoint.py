@@ -19,14 +19,14 @@ class CutPoint:
                        self.j1pt,
                        self.cent]
         
-    lookup = { 'index' : 0,
-               'mll'   : 1,
-               'mjj'   : 2,
-               'l0pt'  : 3,
-               'l1pt'  : 4,
-               'j0pt'  : 5,
-               'j1pt'  : 6,
-               'cent'  : 7 }
+    lookup = { 'index'      : 0,
+               'mll'        : 1,
+               'mjj'        : 2,
+               'l0pt'       : 3,
+               'l1pt'       : 4,
+               'j0pt'       : 5,
+               'j1pt'       : 6,
+               'centrality' : 7 }
         
     def get_value(self,name):
         if name in self.lookup:

@@ -25,3 +25,4 @@ analysis/h_ssww_ROC.pdf
 analysis/plots
 
 analysis_new/old_results.txt
+analysis_new/*.png

@@ -56,6 +56,7 @@ best_cut = def_cut
 start = time.time()
 
 for i in range(nEntries):
+
     # counter so we know the code is running
     if i%10000 == 0:
         now = time.time()
@@ -134,10 +135,15 @@ files_bkg = getBkgFiles()
 weights = get_event_weights()
 
 # ----------------------------------------------------
+# create histograms for plotting
+# ----------------------------------------------------
+plot_sig, plot_bkg = create_histograms()
+
+# ----------------------------------------------------
 # loop over signal files
 # ----------------------------------------------------
-sig_num_def = 0
-sig_num_opt = 0
+sig_num_def = 0 # default selection
+sig_num_opt = 0 # optimized selection
 start = time.time()
 
 for f in files_sig:
@@ -153,7 +159,13 @@ for f in files_sig:
             
         # fill event info
         sTree.GetEntry(i)
-       
+
+        # get event weight
+        weight = sTree.weight_total_no3rdlep*weights[sTree.runNumber]
+        if sTree.weight_event > 1000:
+            print "Found event in sample {} with very large weight ({}), skipping. . .".format(sTree.runNumber,sTree.weight_event)
+            continue
+        
         # count events that pass the best cut point
         if pass_cut_point(sTree, best_cut):
             sig_num_opt += sTree.weight_total_no3rdlep*weights[999999]
@@ -162,6 +174,9 @@ for f in files_sig:
         if pass_cut_point(sTree, def_cut):
         #if sTree.pass_selection == 10:
             sig_num_def += sTree.weight_total_no3rdlep*weights[999999]
+
+        # fill histogram. for now we'll plot all the available events with no selection
+        fill_histograms(sTree, weight, plot_sig)
 
 
 print "DONE reading {} signal events in {:.2f} sec.".format(nEntries,time.time()-start)
@@ -180,7 +195,7 @@ for f in files_bkg:
     nEntries = bTree.GetEntries()
 
     for i in range(nEntries):
-
+        
         count += 1
         if count%100000 == 0:
             now = time.time()
@@ -189,16 +204,84 @@ for f in files_bkg:
         # fill event info
         bTree.GetEntry(i)
 
+        # get event weight
+        weight = bTree.weight_total_no3rdlep*weights[bTree.runNumber]
+        if bTree.weight_event > 1000:
+            print "Found event in sample {} with very large weight ({}), skipping. . .".format(bTree.runNumber,bTree.weight_event)
+            continue
+        
         # count events that pass the best cut point
         if pass_cut_point(bTree, best_cut):
-            bkg_num_opt += bTree.weight_total_no3rdlep*weights[bTree.runNumber]
+            bkg_num_opt += weight
         
         # count events that pass the default cuts
         if pass_cut_point(bTree, def_cut):
         #if bTree.pass_selection == 10:
-            bkg_num_def += bTree.weight_total_no3rdlep*weights[bTree.runNumber]
+            bkg_num_def += weight
+
+        # fill histogram. for now we'll plot all the available events with no selection
+        fill_histograms(bTree, weight, plot_bkg)
             
 print "DONE reading {} background events in {:.2f} sec.".format(count,time.time()-start)
 
 print "Before optimization -- sig: {} bkg: {} Z: {}".format(sig_num_def,bkg_num_def,signalSignificance(sig_num_def,bkg_num_def))
 print "After optimization  -- sig: {} bkg: {} Z: {}".format(sig_num_opt,bkg_num_opt,signalSignificance(sig_num_opt,bkg_num_opt))
+
+# ----------------------------------------------------
+# Make and save the plots
+# ----------------------------------------------------
+
+# set up canvas
+plot_style()
+c1 = TCanvas("c1","c1",900,600)
+c1.SetBottomMargin(0.15)
+c1.SetLeftMargin(0.15)
+normalize = True
+
+# format plots
+plot_labels = ['m_{ll}', 'm_{jj}', 'centrality',
+               'l_{0} p_{T}', 'l_{1} p_{T}',
+               'j_{0} p_{T}', 'j_{1} p_{T}']
+plot_titles = ['mll', 'mjj', 'centrality',
+               'l0pt', 'l1pt', 'j0pt', 'j1pt']
+for i in range(len(plot_sig)):
+    format_hist(plot_sig[i], True,  normalize, plot_labels[i])
+    format_hist(plot_bkg[i], False, normalize, plot_labels[i])
+
+    # i need to add the bkg to a stack to get it to fill properly. no one knows why you have to do it this way, but you do...
+    stack = THStack("s{}".format(i),"stack") 
+    stack.Add(plot_bkg[i])
+
+    # legend
+    brun = TLegend(.65,.7,.85,.9)
+    brun.SetBorderSize(0)
+    brun.SetFillColor(0)
+    brun.SetTextSize(0.03)
+    brun.SetTextFont(42)
+    brun.AddEntry(plot_sig[i], "W^{#pm}W^{#pm} signal", "pe")
+    brun.AddEntry(plot_bkg[i], "Background", "f")
+
+    # set y axis for both so they fit on the same plot
+    scale_y_axis([plot_sig[i], stack])
+
+    # get arrows for old and new cut values
+    def_line = getTLineY(def_cut.get_value(plot_titles[i]),  plot_sig[i], False)
+    opt_line = getTLineY(best_cut.get_value(plot_titles[i]), plot_sig[i], True)
+    arrow = getTArrowX(def_cut.get_value(plot_titles[i]),
+                       best_cut.get_value(plot_titles[i]),
+                       plot_sig[i])
+    
+    # for reasons unkown, the stack needs to be drawn before the axes can be changed
+    #  (actually it's because the axis object isn't created until it's drawn)
+    stack.Draw("hist")
+    stack.GetYaxis().SetTitle("Events")
+    stack.GetXaxis().SetTitle(plot_labels[i])
+    stack.SetTitle(plot_titles[i])
+    stack.Draw("hist")
+    plot_bkg[i].Draw("SAME")
+    plot_sig[i].Draw("SAME")
+    brun.Draw()
+    def_line.Draw()
+    opt_line.Draw()
+    arrow.Draw()
+    c1.Print("test{}.png".format(i), "Portrait png")
