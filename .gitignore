@@ -1,8 +1,10 @@
 *~
 **/*~
+**/**/*~
 
 *.root
 **/*.root
+**/**/*.root
 
 obj/
 
@@ -13,3 +15,13 @@ train
 script.py
 
 test
+
+*.pyc
+**/*.pyc
+**/**/*.pyc
+
+analysis/r_ssww.txt
+analysis/h_ssww_ROC.pdf
+analysis/plots
+
+analysis_new/old_results.txt

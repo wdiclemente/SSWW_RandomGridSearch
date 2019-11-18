@@ -1,18 +1,9 @@
 #!/usr/bin/env python
 # ---------------------------------------------------------------------
 #  File:        analysis.py
-#  Description: HO1: Analyze the results of RGS and find the best cuts.
-#               Definitions:
-#                 1. A one-sided cut is a threshold on a single
-#                    variable.
-#                    e.g., x > xcut
-#                 2. A cut-point is the AND of a sequence of cuts. This
-#                    can be visualized as a point in the space of cuts.
-#                 3. A two-sided cut is a two-sided threshold.
-#                    e.g., (x > xlow) and (x < xhigh)
-#                 4. A staircase cut is the OR of cut-points.
 # ---------------------------------------------------------------------
 #  Created:     10-Jan-2015 Harrison B. Prosper and Sezen Sekmen
+#  Modified:    Will DiClemente for SSWW @HL-LHC Upgrade Study 2018
 # ---------------------------------------------------------------------
 import os, sys, re
 from string import *
@@ -68,13 +59,11 @@ def main():
     gROOT.SetBatch()
     atlas()
 
-    print "="*80
-    print "\t=== HO1: obtain best one-sided cuts ==="
-    print "="*80
-
+    getBkgFiles_dict()
+    
     NAME = 'ssww'
     
-    resultsfilename = "%s.root" % NAME
+    resultsfilename = "%s_50k.root" % NAME
 
     treename = "RGS"
     print "\n\topen RGS file: %s"  % resultsfilename
@@ -152,7 +141,8 @@ def main():
         c_fake     = cuts.count_222222
         c_flip     = cuts.count_111111
         c_zjets    = cuts.count_147806 + cuts.count_147807
-        c_wjets    = cuts.count_363600 + cuts.count_363601 + cuts.count_363602 + cuts.count_363603 + cuts.count_363604 + cuts.count_363605 + cuts.count_363606 + cuts.count_363607 + cuts.count_363608 + cuts.count_363609 + cuts.count_363610 + cuts.count_363611 + cuts.count_363612 + cuts.count_363613 + cuts.count_363614 + cuts.count_363615 + cuts.count_363616 + cuts.count_363617 + cuts.count_363618 + cuts.count_363619 + cuts.count_363620 + cuts.count_363621 + cuts.count_363622 + cuts.count_363623 + cuts.count_363624 + cuts.count_363625 + cuts.count_363626 + cuts.count_363627 + cuts.count_363628 + cuts.count_363629 + cuts.count_363630 + cuts.count_363631 + cuts.count_363632 + cuts.count_363633 + cuts.count_363634 + cuts.count_363635 + cuts.count_363636 + cuts.count_363637 + cuts.count_363638 + cuts.count_363639 + cuts.count_363640 + cuts.count_363641 + cuts.count_363642 + cuts.count_363643 + cuts.count_363644 + cuts.count_363645 + cuts.count_363646 + cuts.count_363647 + cuts.count_363648 + cuts.count_363649 + cuts.count_363650 + cuts.count_363651 + cuts.count_363652 + cuts.count_363653 + cuts.count_363654 + cuts.count_363655 + cuts.count_363656 + cuts.count_363657 + cuts.count_363658 + cuts.count_363659 + cuts.count_363660 + cuts.count_363661 + cuts.count_363662 + cuts.count_363663 + cuts.count_363664 + cuts.count_363665 + cuts.count_363666 + cuts.count_363667 + cuts.count_363668 + cuts.count_363669 + cuts.count_363670 + cuts.count_363671
+        #c_wjets    = cuts.count_363600 + cuts.count_363601 + cuts.count_363602 + cuts.count_363603 + cuts.count_363604 + cuts.count_363605 + cuts.count_363606 + cuts.count_363607 + cuts.count_363608 + cuts.count_363609 + cuts.count_363610 + cuts.count_363611 + cuts.count_363612 + cuts.count_363613 + cuts.count_363614 + cuts.count_363615 + cuts.count_363616 + cuts.count_363617 + cuts.count_363618 + cuts.count_363619 + cuts.count_363620 + cuts.count_363621 + cuts.count_363622 + cuts.count_363623 + cuts.count_363624 + cuts.count_363625 + cuts.count_363626 + cuts.count_363627 + cuts.count_363628 + cuts.count_363629 + cuts.count_363630 + cuts.count_363631 + cuts.count_363632 + cuts.count_363633 + cuts.count_363634 + cuts.count_363635 + cuts.count_363636 + cuts.count_363637 + cuts.count_363638 + cuts.count_363639 + cuts.count_363640 + cuts.count_363641 + cuts.count_363642 + cuts.count_363643 + cuts.count_363644 + cuts.count_363645 + cuts.count_363646 + cuts.count_363647 + cuts.count_363648 + cuts.count_363649 + cuts.count_363650 + cuts.count_363651 + cuts.count_363652 + cuts.count_363653 + cuts.count_363654 + cuts.count_363655 + cuts.count_363656 + cuts.count_363657 + cuts.count_363658 + cuts.count_363659 + cuts.count_363660 + cuts.count_363661 + cuts.count_363662 + cuts.count_363663 + cuts.count_363664 + cuts.count_363665 + cuts.count_363666 + cuts.count_363667 + cuts.count_363668 + cuts.count_363669 + cuts.count_363670 + cuts.count_363671
+        c_wjets    = cuts.count_363606 + cuts.count_363609 + cuts.count_363612 + cuts.count_363613 + cuts.count_363615 + cuts.count_363616 + cuts.count_363617 + cuts.count_363618 + cuts.count_363619 + cuts.count_363620 + cuts.count_363621 + cuts.count_363622 + cuts.count_363623 + cuts.count_363630 + cuts.count_363631 + cuts.count_363632 + cuts.count_363633 + cuts.count_363634 + cuts.count_363635 + cuts.count_363636 + cuts.count_363637 + cuts.count_363638 + cuts.count_363639 + cuts.count_363640 + cuts.count_363641 + cuts.count_363642 + cuts.count_363643 + cuts.count_363644 + cuts.count_363645 + cuts.count_363646 + cuts.count_363647 + cuts.count_363654 + cuts.count_363660 + cuts.count_363662 + cuts.count_363663 + cuts.count_363666
         s  = c_wwsig
         b  = c_wwtx+c_wwbkg+c_diboson+c_triboson+c_top+c_fake+c_flip+c_zjets+c_wjets
 
@@ -167,7 +157,8 @@ def main():
         stat_fake     = cuts.error_222222
         stat_flip     = cuts.error_111111
         stat_zjets    = cuts.error_147806 + cuts.error_147807
-        stat_wjets    = cuts.error_363600 + cuts.error_363601 + cuts.error_363602 + cuts.error_363603 + cuts.error_363604 + cuts.error_363605 + cuts.error_363606 + cuts.error_363607 + cuts.error_363608 + cuts.error_363609 + cuts.error_363610 + cuts.error_363611 + cuts.error_363612 + cuts.error_363613 + cuts.error_363614 + cuts.error_363615 + cuts.error_363616 + cuts.error_363617 + cuts.error_363618 + cuts.error_363619 + cuts.error_363620 + cuts.error_363621 + cuts.error_363622 + cuts.error_363623 + cuts.error_363624 + cuts.error_363625 + cuts.error_363626 + cuts.error_363627 + cuts.error_363628 + cuts.error_363629 + cuts.error_363630 + cuts.error_363631 + cuts.error_363632 + cuts.error_363633 + cuts.error_363634 + cuts.error_363635 + cuts.error_363636 + cuts.error_363637 + cuts.error_363638 + cuts.error_363639 + cuts.error_363640 + cuts.error_363641 + cuts.error_363642 + cuts.error_363643 + cuts.error_363644 + cuts.error_363645 + cuts.error_363646 + cuts.error_363647 + cuts.error_363648 + cuts.error_363649 + cuts.error_363650 + cuts.error_363651 + cuts.error_363652 + cuts.error_363653 + cuts.error_363654 + cuts.error_363655 + cuts.error_363656 + cuts.error_363657 + cuts.error_363658 + cuts.error_363659 + cuts.error_363660 + cuts.error_363661 + cuts.error_363662 + cuts.error_363663 + cuts.error_363664 + cuts.error_363665 + cuts.error_363666 + cuts.error_363667 + cuts.error_363668 + cuts.error_363669 + cuts.error_363670 + cuts.error_363671
+        #stat_wjets    = cuts.error_363600 + cuts.error_363601 + cuts.error_363602 + cuts.error_363603 + cuts.error_363604 + cuts.error_363605 + cuts.error_363606 + cuts.error_363607 + cuts.error_363608 + cuts.error_363609 + cuts.error_363610 + cuts.error_363611 + cuts.error_363612 + cuts.error_363613 + cuts.error_363614 + cuts.error_363615 + cuts.error_363616 + cuts.error_363617 + cuts.error_363618 + cuts.error_363619 + cuts.error_363620 + cuts.error_363621 + cuts.error_363622 + cuts.error_363623 + cuts.error_363624 + cuts.error_363625 + cuts.error_363626 + cuts.error_363627 + cuts.error_363628 + cuts.error_363629 + cuts.error_363630 + cuts.error_363631 + cuts.error_363632 + cuts.error_363633 + cuts.error_363634 + cuts.error_363635 + cuts.error_363636 + cuts.error_363637 + cuts.error_363638 + cuts.error_363639 + cuts.error_363640 + cuts.error_363641 + cuts.error_363642 + cuts.error_363643 + cuts.error_363644 + cuts.error_363645 + cuts.error_363646 + cuts.error_363647 + cuts.error_363648 + cuts.error_363649 + cuts.error_363650 + cuts.error_363651 + cuts.error_363652 + cuts.error_363653 + cuts.error_363654 + cuts.error_363655 + cuts.error_363656 + cuts.error_363657 + cuts.error_363658 + cuts.error_363659 + cuts.error_363660 + cuts.error_363661 + cuts.error_363662 + cuts.error_363663 + cuts.error_363664 + cuts.error_363665 + cuts.error_363666 + cuts.error_363667 + cuts.error_363668 + cuts.error_363669 + cuts.error_363670 + cuts.error_363671
+        stat_wjets = 0
 
         # systematic errors
         syst_wwbkg    = (c_wwbkg    * sys_wwqcd)**2
@@ -229,6 +220,11 @@ def main():
     # -------------------------------------------------------------            
     # Write out best cut
     # -------------------------------------------------------------
+    print bestZ
+    print bestRow
+    print bestSig
+    print bestBkg
+    
     bestcuts = writeSSWWResults('r_%s.txt' % NAME,
                                 '%s.cuts'  % NAME,
                                 ntuple, variables,

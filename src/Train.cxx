@@ -36,7 +36,7 @@ void Train::DoTrain(int nCutPoints) {
   // update timer before cut point loop
   cl_start = std::clock();
   double cl_previous = cl_start;
-
+  
   // loop over cut points
   for(unsigned int i=0; i<nCutPoints; i++) {
     if(i%1000 == 0) {
@@ -50,8 +50,7 @@ void Train::DoTrain(int nCutPoints) {
 
     pass_map.clear();
     seen_map.clear();
-    //m_run_numbers.clear(); // i don't know why this line is here
-
+   
     // set up run number markers
     int currRun = -1;
     int prevRun = (*m_Events.begin())->getRunNumber();

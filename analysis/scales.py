@@ -4,7 +4,6 @@ Lumi     = 3000           # 1/fb
 dummy    = 100000.0
 
 print "scales.py: doPolar = ",settings.doPolar
-print "scales.py: do13TeV = ",settings.do13TeV
 print "scales.py: doLoose = ",settings.doLoose
 
 scaleDict = {}
@@ -54,7 +53,6 @@ diboson364255scale = diboson364255[0]/diboson364255[1] * Lumi
 scaleDict[364255]  = diboson364255scale
 
 diboson363718      = [4351.2, 26914814.0, 1.0]
-#diboson363718      = [4351.2, 17508830.0, 1.0] # UPDATE
 diboson363718scale = diboson363718[0]/diboson363718[1] * Lumi
 scaleDict[363718]  = diboson363718scale
 
@@ -149,7 +147,6 @@ ttx410220scale = ttx410220[0]/ttx410220[1] * Lumi
 scaleDict[410220] = ttx410220scale
 
 # grid charge flip/fakes: single top
-#kfactors from spreadsheet (https://docs.google.com/spreadsheets/d/12uCbi789-Gm_c9KyBBfD3vNlrlgC1h8QbG6EJRki0cU/edit#gid=0)
 if settings.doLoose:
     chfake410642      = [41915.0, 77535968.0, 1.0, 3.6922] # truth1pp loose
 elif settings.do20GeV:
@@ -187,19 +184,14 @@ chfake410645scale = chfake410645[0]*chfake410645[3]/chfake410645[1] * Lumi
 scaleDict[410645] = chfake410645scale
 
 # grid charge flip/fakes: ttbar
-if settings.do13TeV:
-    chfake410501      = [730170.0, 7283526656.0, .54383, 1.0] # truth1pp
-    chfake410501scale = chfake410501[0]*chfake410501[2]*chfake410501[3]/chfake410501[1] * Lumi
-    scaleDict[410501] = chfake410501scale
+if settings.doLoose:
+    chfake410501      = [863860.0, 12695142400.0, .54383, 1.0] # truth1pp loose
+elif settings.do20GeV:
+    chfake410501      = [863860.0, 16773300224.0, .54383, 1.0]
 else:
-    if settings.doLoose:
-        chfake410501      = [863860.0, 12695142400.0, .54383, 1.0] # truth1pp loose
-    elif settings.do20GeV:
-        chfake410501      = [863860.0, 16773300224.0, .54383, 1.0]
-    else:
-        chfake410501      = [863860.0, 17153086464.0, .54383, 1.0] # truth1pp tight
-    chfake410501scale = chfake410501[0]*chfake410501[2]*chfake410501[3]/chfake410501[1] * Lumi
-    scaleDict[410501] = chfake410501scale
+    chfake410501      = [863860.0, 17153086464.0, .54383, 1.0] # truth1pp tight
+chfake410501scale = chfake410501[0]*chfake410501[2]*chfake410501[3]/chfake410501[1] * Lumi
+scaleDict[410501] = chfake410501scale
 
 chfake410000      = [824510.0, 298200032.0, .54383, 1.0] # old ttbar sample for cross check
 chfake410000scale = chfake410000[0]*chfake410000[2]*chfake410000[3]/chfake410000[1] * Lumi
@@ -215,7 +207,7 @@ zjets147807scale  = zjets147807[0]/zjets147807[1] * Lumi
 scaleDict[147807] = zjets147807scale
 
 #w+jets samples
-wjetfile = open("xsec_wjets.txt",'r')
+wjetfile = open("../data/xsec_wjets.txt",'r')
 for line in wjetfile:
     if line.startswith('#'): continue
     line = line.split()
