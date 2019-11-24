@@ -22,7 +22,7 @@ CXX := g++
 #CXXFLAGS := -O -Wall -fPIC -g -ansi -Wshadow -Wextra $(shell root-config --cflags)
 LDFLAGS  := $(shell root-config --cflags)
 LDLIBS   := $(shell root-config --libs)
-CXXFLAGS :=  -c -o $(shell root-config --cflags) #-std=c++11
+CXXFLAGS :=  -c -o $(shell root-config --cflags) -std=c++11
 CPPFLAGS := -I. -I$(INC_DIR)
 
 # do stuff

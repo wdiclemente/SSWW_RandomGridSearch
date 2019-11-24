@@ -9,6 +9,7 @@
 bool sortByRun(Event *l, Event *r) { return l->getRunNumber() < r->getRunNumber(); };
 
 void Train::DoTrain(int nCutPoints) {
+
   // make sure we have enough cut points
   if(nCutPoints < 0) {
     std::cout << "DoTrain: nCutPoints is less than 0. Using all available cut points!" << std::endl;
@@ -35,7 +36,7 @@ void Train::DoTrain(int nCutPoints) {
   // update timer before cut point loop
   cl_start = std::clock();
   double cl_previous = cl_start;
-
+  
   // loop over cut points
   for(unsigned int i=0; i<nCutPoints; i++) {
     if(i%1000 == 0) {
@@ -49,7 +50,7 @@ void Train::DoTrain(int nCutPoints) {
 
     pass_map.clear();
     seen_map.clear();
-
+   
     // set up run number markers
     int currRun = -1;
     int prevRun = (*m_Events.begin())->getRunNumber();
@@ -165,6 +166,11 @@ int Train::ReadSignal() {
     CutPoint *c = new CutPoint(cutPointIndex,*e);
     cutPointIndex++;
     m_CutPoints.push_back(c);
+
+    // add the run number to the run number vector (only if it's not already there)
+    if(std::find(m_run_numbers.begin(), m_run_numbers.end(), 999999) == m_run_numbers.end()) {
+      m_run_numbers.push_back(999999);
+    }
     
   }
 
@@ -216,6 +222,11 @@ int Train::ReadBackground() {
 			 lepjet_centrality);
     m_BkgEvents.push_back(e);
     m_Events   .push_back(e);
+
+    // add the run number to the run number vector (only if it's not already there)
+    if(std::find(m_run_numbers.begin(), m_run_numbers.end(), newRunNumber) == m_run_numbers.end()) {
+      m_run_numbers.push_back(newRunNumber);
+    }
     
   }
 

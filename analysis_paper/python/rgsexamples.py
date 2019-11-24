@@ -7,95 +7,57 @@ from ROOT import *
 execfile('scales.py')
 execfile('systematics.py')
 
-def getBkgFiles(do_13TeV = False):
+def getBkgFiles():
     files = []
-    file_directory = "/disk/userdata00/atlas_data2/wdic/ssWW_upgrade_v13_FCTight/"
-    # manually add local files
-    files.append("local_v13_FCTight/hist-oldsamples.mc15_14TeV.private.ssWWQCD.root")
-    # grid files
-    for root, directories, filenames in os.walk(file_directory):
-        for filename in filenames:
-            filepath = os.path.join(root,filename)
-            if not '.root' in filepath: continue
-            if '363719' in filepath: continue #old WZ sample
-            if '410000' in filepath: continue # for ttbar debugging
-            if '410501' in filepath:
-                if not do_13TeV and 'mc15_13TeV' in filepath:
-                    continue
-                elif   do_13TeV and 'mc15_14TeV' in filepath:
-                    continue
+    
+    # file containing full paths of data samples
+    file_list = open("../data/files_20GeV.txt")
 
-            if settings.doPolar and (not settings.useCombinedSig):
-                if '990031' in filepath and 'LL' in filepath: continue # LL sig
-            else:
-                if '990031' in filepath: continue # LL and TX
-     
-            files.append(filepath)
-
-    # w+jets
-    file_directory = "/disk/userdata00/atlas_data2/wdic/ssWW_upgrade_v13_wjets_FCTight/"
-    for root, directories, filenames in os.walk(file_directory):
-        for filename in filenames:
-            filepath = os.path.join(root,filename)
-            if not '.root' in filepath: continue
-            files.append(filepath)
-
-    #print files
+    for line in file_list:
+        line = line.strip()
+        # remove old/debug samples
+        if '363719' in line: continue # old WZ sample
+        if '410000' in line: continue # old ttbar debug sample
+        
+        files.append(line)
 
     return files
 
 def getBkgFiles_dict():
     files = {}
-    file_directory = "/disk/userdata00/atlas_data2/wdic/ssWW_upgrade_v13_FCTight/"
 
-    # manually add local files
-    files['123456'] = ["local_v13_FCTight/hist-oldsamples.mc15_14TeV.private.ssWWQCD.root"]
+    # file containing full paths of data samples
+    file_list = open("../data/files_20GeV.txt")
 
-    # grid files
-    for root, directories, filenames in os.walk(file_directory):
-        for filename in filenames:
-            filepath = os.path.join(root,filename)
-            if not '.root' in filepath: continue
-            run = root.split('.')[3]
+    for line in file_list:
+        line = line.strip() # full path
+        sample = line.split('/')[-2] # grid sample name
 
-            if '363719' in filepath: continue # old WZ sample
-            if '410000' in filepath: continue # for ttbar debugging
-            if 'mc15_13TeV' in filepath: continue
+        # special case
+        if "ssWWQCD" in line:
+            files['123456'] = line
+            continue
 
-            if settings.doPolar and (not settings.useCombinedSig):
-                if '990031' in filepath and 'LL' in filepath: continue
-            else:
-                if '990031' in filepath: continue # LL and TX samples
+        run = sample.split('.')[3] # run number
 
-            if run in files:
-                files[run].append(filepath)
-            else:
-                files[run] = [filepath]
+        # remove old/debug samples
+        if '363719' in line: continue # old WZ sample
+        if '410000' in line: continue # old ttbar debug sample
 
-    # w+jets
-    file_directory = "/disk/userdata00/atlas_data2/wdic/ssWW_upgrade_v13_wjets_FCTight/"
-    for root, directories, filenames in os.walk(file_directory):
-        for filename in filenames:
-            filepath = os.path.join(root,filename)
-            if not '.root' in filepath: continue
-            run = root.split('.')[3]
-            if run in files:
-                files[run].append(filepath)
-            else:
-                files[run] = [filepath]
-    #print "Background file dictionary:\n",files
+        # add remaining files to dictionary
+        if run in files:
+            files[run].append(line)
+        else:
+            files[run] = [line]
+
     return files
     
 
 def getSigFiles():
     files = []
     #just one file for now
-    if settings.doPolar and (not settings.useCombinedSig):
-        files.append("/disk/userdata00/atlas_data2/wdic/ssWW_upgrade_v13_FCTight/user.karolos.ssWWupgrade.990031.LL.v13.TrackCalo.FCTight.00_hist/merged.990031.LL.root")
-    else:
-        files.append("local_v13_FCTight/hist-oldsamples.mc15_14TeV.private.ssWWEW.root")
+    files.append("/home/will/Documents/ssww_upgrade_rgs/ssww_local_data/local_v14_20GeV/hist-oldsamples.mc15_14TeV.private.ssWWEW.root")
 
-    #print "Signal file list:\n",files
     return files
 
 def scaleYAxis(hist_list, scale_factor = 1.4):
@@ -576,7 +538,7 @@ def getSSWWSignalZ(bestcuts):
 
     # get data ntuples
     sntuple = Ntuple(getSigFiles(), 't_events')
-    bntuple = Ntuple(getBkgFiles(settings.do13TeV), 't_events')
+    bntuple = Ntuple(getBkgFiles(), 't_events')
 
     # default cuts
     default_dict = {} # [total, mm, ee, me, em]
@@ -826,14 +788,8 @@ def writeSSWWResults(filename, varfilename, ntuple, variables,
     record = "\nZ values"
     out.write('%s\n' % record); print record
     
-    #record = "  before optimization, no cuts:  %10.3f" % Z
-    #out.write('%s\n' % record); print record
-
     record = "  before optimization, default cuts: %10.3f" % sel_Z
     out.write('%s\n' % record); print record
-
-    #record = "  after optimization:   %10.3f" % bestZ
-    #out.write('%s\n' % record); print record    
 
     record = "  after optimization, new cuts:      %10.3f" % opt_Z
     out.write('%s\n' % record); print record

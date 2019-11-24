@@ -1,8 +1,10 @@
 *~
 **/*~
+**/**/*~
 
 *.root
 **/*.root
+**/**/*.root
 
 obj/
 
@@ -11,3 +13,17 @@ root_backups/
 train
 
 script.py
+
+test
+
+*.pyc
+**/*.pyc
+**/**/*.pyc
+
+analysis_paper/r_ssww.txt
+analysis_paper/h_ssww_ROC.pdf
+analysis_paper/plots
+
+analysis/old_results.txt
+analysis/*.png
+analysis/*.pdf
