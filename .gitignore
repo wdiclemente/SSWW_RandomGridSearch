@@ -20,9 +20,10 @@ test
 **/*.pyc
 **/**/*.pyc
 
-analysis/r_ssww.txt
-analysis/h_ssww_ROC.pdf
-analysis/plots
+analysis_paper/r_ssww.txt
+analysis_paper/h_ssww_ROC.pdf
+analysis_paper/plots
 
-analysis_new/old_results.txt
-analysis_new/*.png
+analysis/old_results.txt
+analysis/*.png
+analysis/*.pdf
