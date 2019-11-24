@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os,sys,time
+from math import sqrt
 from ROOT import *
 from utils import *
 from cutpoint import *
@@ -22,7 +23,7 @@ from cutpoint import *
 # ----------------------------------------------------
 # open file and get tree
 # ----------------------------------------------------
-rFile = TFile("../analysis/ssww_50k.root", "READ")
+rFile = TFile("../analysis/ssww_all.root", "READ")
 rTree = rFile.Get("RGS")
 nEntries = rTree.GetEntries()
 
@@ -50,6 +51,7 @@ def_cut = CutPoint(def_cuts)
 # initialize variables
 best_sig = -1
 best_bkg = -1
+best_ber = -1
 best_Z   = -1
 best_cut = def_cut
 
@@ -79,6 +81,7 @@ for i in range(nEntries):
         if run == '363719': continue # old sample, no longer used
         bkg_num += event['count_'+run]
         bkg_err += event['error_'+run] # errors are already calculated as the square
+    bkg_err = sqrt(bkg_err)
 
     # ----------------------------------------------------
     # calculate signal significance and store the best
@@ -106,6 +109,7 @@ for i in range(nEntries):
         
         best_sig = sig_num
         best_bkg = bkg_num
+        best_ber = bkg_err
         best_Z   = Z
         best_cut = CutPoint(event)
 
@@ -143,7 +147,9 @@ plot_sig, plot_bkg = create_histograms()
 # loop over signal files
 # ----------------------------------------------------
 sig_num_def = 0 # default selection
+sig_err_def = 0 
 sig_num_opt = 0 # optimized selection
+sig_err_opt = 0
 start = time.time()
 
 for f in files_sig:
@@ -161,31 +167,38 @@ for f in files_sig:
         sTree.GetEntry(i)
 
         # get event weight
-        weight = sTree.weight_total_no3rdlep*weights[sTree.runNumber]
+        weight = sTree.weight_total_no3rdlep*weights[999999]
         if sTree.weight_event > 1000:
             print "Found event in sample {} with very large weight ({}), skipping. . .".format(sTree.runNumber,sTree.weight_event)
             continue
         
         # count events that pass the best cut point
         if pass_cut_point(sTree, best_cut):
-            sig_num_opt += sTree.weight_total_no3rdlep*weights[999999]
+            sig_num_opt += weight
+            sig_err_opt += weight**2
             
         # count events that pass the default cuts
         if pass_cut_point(sTree, def_cut):
         #if sTree.pass_selection == 10:
-            sig_num_def += sTree.weight_total_no3rdlep*weights[999999]
+            sig_num_def += weight
+            sig_err_def += weight**2
 
         # fill histogram. for now we'll plot all the available events with no selection
         fill_histograms(sTree, weight, plot_sig)
 
-
+# square root of error terms to get final stat error
+sig_err_def = sqrt(sig_err_def)
+sig_err_opt = sqrt(sig_err_opt)
+        
 print "DONE reading {} signal events in {:.2f} sec.".format(nEntries,time.time()-start)
             
 # ----------------------------------------------------
 # loop over background files
 # ----------------------------------------------------
 bkg_num_def = 0
+bkg_err_def = 0
 bkg_num_opt = 0
+bkg_err_opt = 0
 start = time.time()
 count = -1
 
@@ -213,19 +226,25 @@ for f in files_bkg:
         # count events that pass the best cut point
         if pass_cut_point(bTree, best_cut):
             bkg_num_opt += weight
+            bkg_err_opt += weight**2
         
         # count events that pass the default cuts
         if pass_cut_point(bTree, def_cut):
         #if bTree.pass_selection == 10:
             bkg_num_def += weight
+            bkg_err_def += weight**2
 
         # fill histogram. for now we'll plot all the available events with no selection
         fill_histograms(bTree, weight, plot_bkg)
-            
+
+# square root of error terms to get final stat error
+bkg_err_def = sqrt(bkg_err_def)
+bkg_err_opt = sqrt(bkg_err_opt)
+        
 print "DONE reading {} background events in {:.2f} sec.".format(count,time.time()-start)
 
-print "Before optimization -- sig: {} bkg: {} Z: {}".format(sig_num_def,bkg_num_def,signalSignificance(sig_num_def,bkg_num_def))
-print "After optimization  -- sig: {} bkg: {} Z: {}".format(sig_num_opt,bkg_num_opt,signalSignificance(sig_num_opt,bkg_num_opt))
+print "Before optimization -- sig: {:.2f} +/- {:.2f} bkg: {:.2f} +/- {:.2f} Z: {:.2f}".format(sig_num_def,sig_err_def,bkg_num_def,bkg_err_def,signalSignificanceErr(sig_num_def,bkg_num_def,bkg_err_def))
+print "After optimization  -- sig: {:.2f} +/- {:.2f} bkg: {:.2f} +/- {:.2f} Z: {:.2f}".format(sig_num_opt,sig_err_opt,bkg_num_opt,bkg_err_opt,signalSignificanceErr(sig_num_opt,bkg_num_opt,bkg_err_opt))
 
 # ----------------------------------------------------
 # Make and save the plots
